@@ -9,11 +9,6 @@ logger = logging.getLogger(__name__)
 
 env = gym.make('Blocks-v0')
 
-
-
-
-
-
 def prepro(I):
     # """ prepro 210x160x3 uint8 frame into 6400 (80x80) 1D float vector """
     # I = I[35:195]  # crop
@@ -110,7 +105,6 @@ with tf.Session() as sess:
             k+=1
             print(lastrew,reward, dreward,k)
             print("\n","NEW  STEP", dreward)
-            env.render()
         rList.append(rAll)
         print('Finish episode')
 
