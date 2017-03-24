@@ -3,6 +3,7 @@ import sys
 
 import gym
 import numpy as np
+from gym.spaces import Discrete
 from six import StringIO
 
 # Actions
@@ -20,7 +21,7 @@ logger = logging.getLogger()
 
 class BlocksEnv(gym.Env):
     def __init__(self):
-        self.action_space = {s: {a: [] for a in range(8)} for s in range(100)}
+        self.action_space = Discrete(8)
 
     def _configure(self, raw_map_start=None, raw_map_final=None, state_size=None):
         self.state_size = state_size
@@ -265,7 +266,7 @@ class BlocksEnv(gym.Env):
         return outfile
 
     def _find_hand(self):
-        return (10, 13)  # r(row, column)
+        return [10, 13]  # r(row, column)
 
     def _preprocess_state(self, map):
         raveled = map.astype(np.float).ravel()
