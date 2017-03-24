@@ -1,5 +1,0 @@
-gym_blocks.egg-info/PKG-INFO
-gym_blocks.egg-info/SOURCES.txt
-gym_blocks.egg-info/dependency_links.txt
-gym_blocks.egg-info/requires.txt
-gym_blocks.egg-info/top_level.txt

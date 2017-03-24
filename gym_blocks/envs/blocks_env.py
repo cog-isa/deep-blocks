@@ -1,10 +1,9 @@
-import numpy as np
-import pandas as pd
+import logging
 import sys
-from six import StringIO
-from gym import utils
+
 import gym
-from gym.envs.toy_text import discrete
+import numpy as np
+from six import StringIO
 
 # Actions
 LEFT = 0
@@ -16,247 +15,242 @@ MoveD = 5
 MoveR = 6
 MoveU = 7
 
+logger = logging.getLogger()
+
 
 class BlocksEnv(gym.Env):
-    metadata = {'render.modes': ['human', 'ansi']}
+    def __init__(self):
+        self.action_space = {s: {a: [] for a in range(8)} for s in range(100)}
 
-    def __init__(self, desc=None):
+    def _configure(self, raw_map_start=None, raw_map_final=None, state_size=None):
+        self.state_size = state_size
+        self.sit_start = self._preprocess_state(raw_map_start)
+        self.sit_final = self._preprocess_state(raw_map_final)
+        self.state = np.hstack((self.sit_start, self.sit_final))
 
-        self.task_set = None
-        self.cur_task = None
-        self.task_policy = None
-        self.path_policy = None
-        self.observation_space = None
-        self.obstacle_punishment = None
-        self.local_goal_reward = None
-        self.done_reward = None
-
-
-        mapp = pd.read_csv('gym_blocks/envs/map.csv', sep=';')
-        mapp = np.asarray(mapp)
-        self.mapp = mapp  # initial observation
-        target = np.asarray(pd.read_csv('gym_blocks/envs/target.csv', sep=';'))  # final position of blocks
-        desc = mapp  # this variable will be changed after each step
-
-        self.nrow = len(desc[0])  # dimension of observations  space
-        self.ncol = len(desc)  # dimension of observations  space
-        hand_row = 10  # initial hand center's row
-        hand_col = 13  # initial hand center's col
-
-        self.desc = desc  # current observation, initially the same as mapp
-        self.hand_row = hand_row
-        self.hand_col = hand_col
-
-        nA = 8  # eight actions
-        nS = 100  # number of hand center's
-
-        P = {s: {a: [] for a in range(nA)} for s in
-             range(nS)}  # required for proper work of environment, actually is not used
-        self.target = target  # assigning target
-
-        super(BlocksEnv, self).__init__()
-
+        self.hand_position = self._find_hand()
+        self.sit_current_map = raw_map_start
+        self.sit_final_map = raw_map_final
+        self.last_action = None
+        self.reward = None
 
     def _reset(self):
-        self.s = np.random.choice(60)  # required for proper work of env
-        self.desc = self.mapp.copy()  # assign initial map
-        self.hand_row = 10
-        self.hand_col = 13
-        return self.desc
+        return self.state
 
     def _step(self, a):
 
-        def inc(a, desc):
+        def build_new_state(action, map):
+            current_map = map.copy()
+
             def make_zero(x, y):
-                desc[x][y] = 0
-                desc[x + 1][y] = 0
-                desc[x + 1][y + 1] = 0
-                desc[x + 1][y - 1] = 0
-                desc[x - 1][y] = 0
-            def make_zero_with_cube(x,y):
-                desc[x][y] = 0
-                desc[x+ 1][y] = 0
-                desc[x + 1][y + 1] = 0
-                desc[x + 1][y - 1] = 0
-                desc[x - 1][y] = 0
-                desc[x + 3][y] = 0
-                desc[x + 4][y] = 0
-                desc[x + 2][y] = 0
-                desc[x + 3][y + 1] = 0
-                desc[x + 4][y + 1] = 0
-                desc[x + 2][y + 1] = 0
-                desc[x + 4][y - 1] = 0
-                desc[x + 2][y - 1] = 0
-                desc[x + 3][y - 1] = 0
-            def make_ones_with_cube(x,y):
-                desc[x][y] = 1
-                desc[x+ 1][y] = 1
-                desc[x + 1][y + 1] = 1
-                desc[x + 1][y - 1] = 1
-                desc[x - 1][y] = 1
-                desc[x + 3][y] = 1
-                desc[x + 4][y] = 1
-                desc[x + 2][y] = 1
-                desc[x + 3][y + 1] = 1
-                desc[x + 4][y + 1] = 1
-                desc[x + 2][y + 1] = 1
-                desc[x + 4][y - 1] = 1
-                desc[x + 2][y - 1] = 1
-                desc[x + 3][y - 1] = 1
+                current_map[x][y] = 0
+                current_map[x + 1][y] = 0
+                current_map[x + 1][y + 1] = 0
+                current_map[x + 1][y - 1] = 0
+                current_map[x - 1][y] = 0
+
+            def make_zero_with_cube(x, y):
+                current_map[x][y] = 0
+                current_map[x + 1][y] = 0
+                current_map[x + 1][y + 1] = 0
+                current_map[x + 1][y - 1] = 0
+                current_map[x - 1][y] = 0
+                current_map[x + 3][y] = 0
+                current_map[x + 4][y] = 0
+                current_map[x + 2][y] = 0
+                current_map[x + 3][y + 1] = 0
+                current_map[x + 4][y + 1] = 0
+                current_map[x + 2][y + 1] = 0
+                current_map[x + 4][y - 1] = 0
+                current_map[x + 2][y - 1] = 0
+                current_map[x + 3][y - 1] = 0
+
+            def make_ones_with_cube(x, y):
+                current_map[x][y] = 1
+                current_map[x + 1][y] = 1
+                current_map[x + 1][y + 1] = 1
+                current_map[x + 1][y - 1] = 1
+                current_map[x - 1][y] = 1
+                current_map[x + 3][y] = 1
+                current_map[x + 4][y] = 1
+                current_map[x + 2][y] = 1
+                current_map[x + 3][y + 1] = 1
+                current_map[x + 4][y + 1] = 1
+                current_map[x + 2][y + 1] = 1
+                current_map[x + 4][y - 1] = 1
+                current_map[x + 2][y - 1] = 1
+                current_map[x + 3][y - 1] = 1
+
             def make_ones(x, y):
-                desc[x][y] = 1
-                desc[x + 1][y] = 1
-                desc[x + 1][y + 1] = 1
-                desc[x + 1][y - 1] = 1
-                desc[x - 1][y] = 1
+                current_map[x][y] = 1
+                current_map[x + 1][y] = 1
+                current_map[x + 1][y + 1] = 1
+                current_map[x + 1][y - 1] = 1
+                current_map[x - 1][y] = 1
 
-            if a == 0:  # step left
-                if self.hand_row == 28:
-                    if self.hand_col > 1:
-                        if desc[self.hand_row][self.hand_col - 3] == 0:
+            if action == 0:  # step left
+                if self.hand_position[0] == 28:
+                    if self.hand_position[1] > 1:
+                        if current_map[self.hand_position[0]][self.hand_position[1] - 3] == 0:
+                            make_zero(self.hand_position[0], self.hand_position[1])
+                            self.hand_position[1] = self.hand_position[1] - 3
+                            make_ones(self.hand_position[0], self.hand_position[1])
 
-                            make_zero(self.hand_row, self.hand_col)
-                            self.hand_col = self.hand_col - 3
-                            make_ones(self.hand_row, self.hand_col)
-
-                elif self.hand_row == 25:
-                    if self.hand_col > 1:
-                        if desc[self.hand_row][self.hand_col - 3] == 0:
-                            make_zero(self.hand_row, self.hand_col)
-                            self.hand_col = self.hand_col - 3
-                            make_ones(self.hand_row, self.hand_col)
+                elif self.hand_position[0] == 25:
+                    if self.hand_position[1] > 1:
+                        if current_map[self.hand_position[0]][self.hand_position[1] - 3] == 0:
+                            make_zero(self.hand_position[0], self.hand_position[1])
+                            self.hand_position[1] = self.hand_position[1] - 3
+                            make_ones(self.hand_position[0], self.hand_position[1])
 
                 else:
-                    if self.hand_col > 1:
-                        if (desc[self.hand_row + 3][self.hand_col] == 0) or (desc[self.hand_row + 3][self.hand_col] == 1 and desc[self.hand_row + 6][self.hand_col] == 1):
+                    if self.hand_position[1] > 1:
+                        if (current_map[self.hand_position[0] + 3][self.hand_position[1]] == 0) or (
+                                        current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1 and
+                                        current_map[self.hand_position[0] + 6][
+                                            self.hand_position[1]] == 1):
+                            make_zero(self.hand_position[0], self.hand_position[1])
+                            self.hand_position[1] = self.hand_position[1] - 3
+                            make_ones(self.hand_position[0], self.hand_position[1])
 
-                            make_zero(self.hand_row, self.hand_col)
-                            self.hand_col = self.hand_col - 3
-                            make_ones(self.hand_row, self.hand_col)
+            elif action == 1:
+                if self.hand_position[0] < 26:
+                    if current_map[self.hand_position[0] + 3][self.hand_position[1]] == 0:
+                        make_zero(self.hand_position[0], self.hand_position[1])
+                        self.hand_position[0] = min(self.hand_position[0] + 3, 28)
+                        make_ones(self.hand_position[0], self.hand_position[1])
 
-            elif a == 1:
-                if self.hand_row < 26:
-                    if desc[self.hand_row + 3][self.hand_col] == 0:
-                        make_zero(self.hand_row, self.hand_col)
-                        self.hand_row = min(self.hand_row + 3, 28)
-                        make_ones(self.hand_row, self.hand_col)
+            elif action == 2:  # right
+                if self.hand_position[0] == 28 and self.hand_position[1] < 28:
+                    if current_map[self.hand_position[0]][self.hand_position[1] + 3] == 0:
+                        make_zero(self.hand_position[0], self.hand_position[1])
+                        self.hand_position[1] = min(self.hand_position[1] + 3, 28)
+                        make_ones(self.hand_position[0], self.hand_position[1])
 
-            elif a == 2:  # right
-                if self.hand_row == 28 and self.hand_col < 28:
-                    if desc[self.hand_row][self.hand_col + 3] == 0:
-                        make_zero(self.hand_row, self.hand_col)
-                        self.hand_col = min(self.hand_col + 3, 28)
-                        make_ones(self.hand_row, self.hand_col)
+                elif self.hand_position[0] == 25 and self.hand_position[1] < 28:
+                    if current_map[self.hand_position[0]][self.hand_position[1] + 3] == 0:
+                        make_zero(self.hand_position[0], self.hand_position[1])
+                        self.hand_position[1] = min(self.hand_position[1] + 3, 28)
+                        make_ones(self.hand_position[0], self.hand_position[1])
 
-                elif self.hand_row == 25 and self.hand_col < 28:
-                    if desc[self.hand_row][self.hand_col + 3] == 0:
-                        make_zero(self.hand_row, self.hand_col)
-                        self.hand_col = min(self.hand_col + 3, 28)
-                        make_ones(self.hand_row, self.hand_col)
+                elif self.hand_position[1] < 28:
+                    if (current_map[self.hand_position[0]][self.hand_position[1] + 3] == 0) and (
+                                (current_map[self.hand_position[0] + 3][self.hand_position[1]] == 0) or (
+                                    (current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1 and
+                                             current_map[self.hand_position[0] + 6][
+                                                 self.hand_position[1]] == 1))):
+                        make_zero(self.hand_position[0], self.hand_position[1])
+                        self.hand_position[1] = self.hand_position[1] + 3
+                        make_ones(self.hand_position[0], self.hand_position[1])
 
-                elif self.hand_col < 28:
-                    if (desc[self.hand_row][self.hand_col + 3] == 0) and ((desc[self.hand_row + 3][self.hand_col] == 0) or ((desc[self.hand_row + 3][self.hand_col] == 1 and desc[self.hand_row + 6][self.hand_col] == 1))):
+            elif action == 3:  # up
+                if self.hand_position[0] == 28:
 
-                        make_zero(self.hand_row, self.hand_col)
-                        self.hand_col = self.hand_col + 3
-                        make_ones(self.hand_row, self.hand_col)
+                    make_zero(self.hand_position[0], self.hand_position[1])
+                    self.hand_position[0] = max(self.hand_position[0] - 3, 1)
+                    make_ones(self.hand_position[0], self.hand_position[1])
 
-            elif a == 3:  # up
-                if self.hand_row == 28:
+                elif (current_map[self.hand_position[0] + 3][self.hand_position[1]] == 0) or (
+                                    self.hand_position[0] < 23 and current_map[self.hand_position[0] + 3][
+                                self.hand_position[1]] == 1 and
+                                current_map[self.hand_position[0] + 6][self.hand_position[1]] == 1) or (
+                                current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1 and
+                                self.hand_position[0] == 25):
 
-                    make_zero(self.hand_row, self.hand_col)
-                    self.hand_row = max(self.hand_row - 3, 1)
-                    make_ones(self.hand_row, self.hand_col)
+                    make_zero(self.hand_position[0], self.hand_position[1])
+                    self.hand_position[0] = max(self.hand_position[0] - 3, 1)
+                    make_ones(self.hand_position[0], self.hand_position[1])
 
-                elif (desc[self.hand_row + 3][self.hand_col] == 0) or (
-                            self.hand_row < 23 and desc[self.hand_row + 3][self.hand_col] == 1 and
-                        desc[self.hand_row + 6][self.hand_col] == 1) or (
-                        desc[self.hand_row + 3][self.hand_col] == 1 and self.hand_row == 25):
+            elif action == 4:  # MoveL
+                if self.hand_position[0] < 27:
+                    if current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1 and \
+                                    current_map[self.hand_position[0] + 3][
+                                                self.hand_position[1] - 3] == 0 and self.hand_position[1] > 2 and \
+                                    current_map[self.hand_position[0]][
+                                                self.hand_position[1] - 3] == 0:
+                        make_zero_with_cube(self.hand_position[0], self.hand_position[1])
+                        self.hand_position[1] = self.hand_position[1] - 3
+                        make_ones_with_cube(self.hand_position[0], self.hand_position[1])
 
-                    make_zero(self.hand_row, self.hand_col)
-                    self.hand_row = max(self.hand_row - 3, 1)
-                    make_ones(self.hand_row, self.hand_col)
+            elif action == 5:  # Cube down
+                if self.hand_position[0] < 24:
+                    if (current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1) and (
+                                current_map[self.hand_position[0] + 6][self.hand_position[1]] == 0):
+                        make_zero_with_cube(self.hand_position[0], self.hand_position[1])
+                        self.hand_position[0] = self.hand_position[0] + 3
+                        make_ones_with_cube(self.hand_position[0], self.hand_position[1])
 
-            elif a == 4:  # MoveL
-                if self.hand_row < 27:
-                    if desc[self.hand_row + 3][self.hand_col] == 1 and desc[self.hand_row + 3][
-                                self.hand_col - 3] == 0 and self.hand_col > 2 and desc[self.hand_row][
-                                self.hand_col - 3] == 0:
+            if action == 6:
+                if self.hand_position[1] < 26 and self.hand_position[0] < 27:
+                    if current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1 and \
+                                    current_map[self.hand_position[0] + 3][
+                                                self.hand_position[1] + 3] == 0 and current_map[self.hand_position[0]][
+                                self.hand_position[1] + 3] == 0:
+                        if current_map[self.hand_position[0]][self.hand_position[1]] == 1:
+                            make_zero_with_cube(self.hand_position[0], self.hand_position[1])
+                            self.hand_position[1] = self.hand_position[1] + 3
+                            make_ones_with_cube(self.hand_position[0], self.hand_position[1])
 
-                        make_zero_with_cube(self.hand_row,self.hand_col)
-                        self.hand_col = self.hand_col - 3
-                        make_ones_with_cube(self.hand_row,self.hand_col)
+            if action == 7:  # Move cube up
+                if self.hand_position[0] < 27 and self.hand_position[0] > 3:
+                    if current_map[self.hand_position[0]][self.hand_position[1]] == 1:
+                        if current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1 and \
+                                        current_map[self.hand_position[0] - 3][self.hand_position[1]] == 0:
+                            make_zero_with_cube(self.hand_position[0], self.hand_position[1])
+                            self.hand_position[0] = self.hand_position[0] - 3
+                            make_ones_with_cube(self.hand_position[0], self.hand_position[1])
 
-            elif a == 5: # Cube down
-                if self.hand_row < 24:
-                    if (desc[self.hand_row + 3][self.hand_col] == 1) and (desc[self.hand_row + 6][self.hand_col] == 0):
-
-                        make_zero_with_cube(self.hand_row,self.hand_col)
-                        self.hand_row = self.hand_row + 3
-                        make_ones_with_cube(self.hand_row,self.hand_col)
-
-            if a == 6:
-                if self.hand_col < 26 and self.hand_row < 27:
-                    if desc[self.hand_row + 3][self.hand_col] == 1 and desc[self.hand_row + 3][self.hand_col + 3] == 0 and desc[self.hand_row][self.hand_col + 3] == 0:
-                        if desc[self.hand_row][self.hand_col] == 1:
-                            make_zero_with_cube(self.hand_row,self.hand_col)
-                            self.hand_col = self.hand_col + 3
-                            make_ones_with_cube(self.hand_row,self.hand_col)
-
-            if a == 7:  # Move cube up
-                if self.hand_row < 27 and self.hand_row > 3:
-                    if desc[self.hand_row][self.hand_col] == 1:
-                        if desc[self.hand_row + 3][self.hand_col] == 1 and desc[self.hand_row - 3][self.hand_col] == 0:
-                            make_zero_with_cube(self.hand_row, self.hand_col)
-                            self.hand_row = self.hand_row - 3
-                            make_ones_with_cube(self.hand_row, self.hand_col)
-
-            self.lastaction = a
-            return desc
+            return current_map
 
         def find_hand(x):  # returns current hand center's location
             for i in range(10):
                 for k in range(10):
                     if (x[3 * i + 1][3 * k + 1] == 1) and (x[3 * i + 1][3 * k + 2] == 0) and (x[3 * i + 1][3 * k] == 0):
                         return i, k
+
         def find_cubes(x):  # returns current hand center's location
-            s=0
+            s = 0
             for i in range(10):
                 for k in range(10):
                     if x[3 * i + 1][3 * k + 1] == 1:
-                        s+=1
+                        s += 1
             return s
-        print("N of cubes: ", find_cubes(self.desc))
 
-        inc(a, self.desc)
-        print("current location", self.hand_row, self.hand_col)
+        logger.debug("N of cubes: {}".format(find_cubes(self.sit_current_map)))
 
-        self.desc_for_rew = self.desc.copy()
+        self.sit_current_map = build_new_state(a, self.sit_current_map)
+        logger.debug("current location {0}".format(self.hand_position))
 
-        self.desc_for_rew[self.hand_row][self.hand_col] = 0
-        self.desc_for_rew[self.hand_row + 1][self.hand_col] = 0
-        self.desc_for_rew[self.hand_row - 1][self.hand_col] = 0
-        self.desc_for_rew[self.hand_row + 1][self.hand_col - 1] = 0
-        self.desc_for_rew[self.hand_row + 1][self.hand_col + 1] = 0
+        map_rewarded = self.sit_current_map.copy()
 
-        rew = np.sum(np.array(self.target) * np.array(self.desc_for_rew)) / np.sum(self.target)
-        if (a == 3) and (int(self.lastaction) % 8 > 3): rew = 1.05 * rew  # increase rew for rational movements
-        # assign zero reward for absolutely silly steps
-        if (a == 1) and (int(self.lastaction) % 8 > 3): rew = 0
-        if (a == 3) and (int(self.lastaction) % 8 == 7): rew = 0
-        if (a == 4) and (int(self.lastaction) % 8 == 1): rew = 0
-        if (a == 1) and (int(self.lastaction) % 8 == 3): rew = 0
-        if (a == 3) and (int(self.lastaction) % 8 == 1): rew = 0
-        if (a == 0) and (int(self.lastaction) % 8 == 2): rew = 0
-        if (a == 2) and (int(self.lastaction) % 8 == 0): rew = 0
+        map_rewarded[self.hand_position[0]][self.hand_position[1]] = 0
+        map_rewarded[self.hand_position[0] + 1][self.hand_position[1]] = 0
+        map_rewarded[self.hand_position[0] - 1][self.hand_position[1]] = 0
+        map_rewarded[self.hand_position[0] + 1][self.hand_position[1] - 1] = 0
+        map_rewarded[self.hand_position[0] + 1][self.hand_position[1] + 1] = 0
 
-        self.rew = rew
+        rew = np.sum(np.array(self.sit_final_map) * np.array(map_rewarded)) / np.sum(self.sit_final_map)
+        if self.last_action:
+            if (a == 3) and (int(self.last_action) % 8 > 3): rew = 1.05 * rew  # increase rew for rational movements
+            # assign zero reward for absolutely silly steps
+            if (a == 1) and (int(self.last_action) % 8 > 3): rew = 0
+            if (a == 3) and (int(self.last_action) % 8 == 7): rew = 0
+            if (a == 4) and (int(self.last_action) % 8 == 1): rew = 0
+            if (a == 1) and (int(self.last_action) % 8 == 3): rew = 0
+            if (a == 3) and (int(self.last_action) % 8 == 1): rew = 0
+            if (a == 0) and (int(self.last_action) % 8 == 2): rew = 0
+            if (a == 2) and (int(self.last_action) % 8 == 0): rew = 0
 
-        if rew == 1:
+        self.reward = rew
+        self.last_action = a
+
+        self.state = self._preprocess_state(self.sit_current_map)
+
+        if self.reward == 1:
             self.reset()
-            return (self.desc, rew, 1, 0)  # third param means "game over"
-        print("END STEP \n")
-        return (self.desc, rew, 0, 0)
+            return self.state, self.reward, 1, 0  # third param means "game over"
+        logger.debug("END STEP\n")
+        return self.state, self.reward, 0, 0
 
     def _render(self, mode='human', close=False):
         if close:
@@ -264,22 +258,15 @@ class BlocksEnv(gym.Env):
 
         outfile = StringIO() if mode == 'ansi' else sys.stdout
 
-        desc = self.desc.tolist()
+        desc = self.sit_current_map.tolist()
         desc = [[c for c in line] for line in desc]
-        # desc[self.hand_row][self.hand_col] = utils.colorize(desc[self.hand_row][self.hand_col], "red", highlight=True)
         outfile.write("\n".join(''.join(str(line)) for line in desc) + "\n")
 
-        # if self.lastaction is not None:
-        #     outfile.write("  ({})\n\n".format(
-        #         ["Left", "Down", "Right", "Up", "MoveL", "MoveD", "MoveR", "MoveU"][self.lastaction]))
-        # else:
-        #     outfile.write("\n")
         return outfile
 
+    def _find_hand(self):
+        return (10, 13)  # r(row, column)
 
-
-
-
-
-
-
+    def _preprocess_state(self, map):
+        raveled = map.astype(np.float).ravel()
+        return np.reshape(raveled, [1, self.state_size])
