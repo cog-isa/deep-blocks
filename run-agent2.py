@@ -9,14 +9,14 @@ logger = logging.getLogger(__name__)
 
 env = gym.make('Blocks-v0')
 
-def prepro(I):
-    # """ prepro 210x160x3 uint8 frame into 6400 (80x80) 1D float vector """
-    # I = I[35:195]  # crop
-    # I = I[::2, ::2, 0]  # downsample by factor of 2
-    # I[I == 144] = 0  # erase background (background type 1)
-    # I[I == 109] = 0  # erase background (background type 2)
-    # I[I != 0] = 1  # everything else (paddles, ball) just set to 1
-    return I.astype(np.float).ravel()
+# def prepro(I):
+#     # """ prepro 210x160x3 uint8 frame into 6400 (80x80) 1D float vector """
+#     # I = I[35:195]  # crop
+#     # I = I[::2, ::2, 0]  # downsample by factor of 2
+#     # I[I == 144] = 0  # erase background (background type 1)
+#     # I[I == 109] = 0  # erase background (background type 2)
+#     # I[I != 0] = 1  # everything else (paddles, ball) just set to 1
+#     return I.astype(np.float).ravel()
 
 # Input and output size based on the Env
 input_size = 900
@@ -36,7 +36,7 @@ train = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(
 
 # Set Q-learning related parameters
 dis = .99
-num_episodes = 2000
+num_episodes = 20
 
 # Create lists to contain total rewards and steps per episode
 rList = []
@@ -68,22 +68,24 @@ with tf.Session() as sess:
         s = prepro(env.reset())
         lastrew = 0
         e = 1. / ((i / 50) + 10)
+        epsilon = 0.2
         rAll = 0
         done = False
         local_loss = []
         k=1
         # The Q-Network training
-        while not done:
+        for  f in range(1000):
             # Choose an action by greedily (with e chance of random action) from the Q-network
             Qs = sess.run(Qpred, feed_dict={X: one_hot(find_hand_1d(s))})
             #if np.random.rand(1) < e:
-            if np.random.rand(1) < 0.2:
+            if np.random.rand(1) < epsilon:
                 a = randint(0,7)
             else:
                 a = np.argmax(Qs)
             print(a)
             # Get new state and reward from environment
             s1, reward, done, _ = env.step(a)
+            env.render()
             s1 = prepro(s1)
             if reward == lastrew:
                 dreward = reward - lastrew*sigmoid_array(k/1000)
@@ -100,7 +102,7 @@ with tf.Session() as sess:
 
             # Train our network using target (Y) and predicted Q (Qpred) values
             sess.run(train, feed_dict={X: one_hot(find_hand_1d(s1)), Y: Qs})
-            rAll += dreward
+            rAll += reward
             s = s1
             k+=1
             print(lastrew,reward, dreward,k)

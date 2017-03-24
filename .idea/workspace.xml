@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="66722b54-b3e1-4e71-90c2-81a4bfc83dc3" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gym_blocks/envs/map.numbers" afterPath="$PROJECT_DIR$/gym_blocks/envs/map.numbers" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/agent3.py" afterPath="$PROJECT_DIR$/agent3.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gym_blocks/envs/blocks_env.py" afterPath="$PROJECT_DIR$/gym_blocks/envs/blocks_env.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gym_blocks/envs/map.csv" afterPath="$PROJECT_DIR$/gym_blocks/envs/map.csv" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/run-agent2.py" afterPath="$PROJECT_DIR$/run-agent2.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,35 +22,11 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="run-agent.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/run-agent.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="25" column="18" lean-forward="false" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="18" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="actor_critic.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/actor_critic.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="10" column="25" lean-forward="true" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="run-agent2.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="run-agent2.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/run-agent2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="17" column="50" lean-forward="false" selection-start-line="17" selection-start-column="50" selection-end-line="17" selection-end-column="50" />
+            <state relative-caret-position="232">
+              <caret line="87" column="12" lean-forward="false" selection-start-line="87" selection-start-column="12" selection-end-line="87" selection-end-column="12" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -55,13 +34,28 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="blocks_env.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="agent3.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/agent3.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="154">
+              <caret line="73" column="0" lean-forward="false" selection-start-line="73" selection-start-column="0" selection-end-line="73" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="blocks_env.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gym_blocks/envs/blocks_env.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
-              <caret line="309" column="16" lean-forward="false" selection-start-line="309" selection-start-column="12" selection-end-line="309" selection-end-column="16" />
+            <state relative-caret-position="465">
+              <caret line="31" column="31" lean-forward="true" selection-start-line="31" selection-start-column="31" selection-end-line="31" selection-end-column="31" />
               <folding>
-                <element signature="e#1#19#0" expanded="true" />
+                <element signature="e#0#18#0" expanded="true" />
+                <element signature="e#1988#2150#0" expanded="false" />
+                <element signature="e#2209#2709#0" expanded="false" />
+                <element signature="e#3318#3480#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -81,7 +75,22 @@
       <find>print</find>
       <find>last</find>
       <find>find</find>
+      <find>from</find>
+      <find>import</find>
+      <find>utils</find>
+      <find />
+      <find>0</find>
+      <find>get_sta</find>
+      <find>super</find>
+      <find>get_obs</find>
+      <find>find_</find>
+      <find>ta</find>
+      <find>target</find>
     </findStrings>
+    <replaceStrings>
+      <replace>1</replace>
+      <replace>y</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -100,15 +109,16 @@
         <option value="$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py" />
         <option value="$PROJECT_DIR$/gym_blocks/envs/atari.py" />
         <option value="$PROJECT_DIR$/run-agent.py" />
-        <option value="$PROJECT_DIR$/run-agent2.py" />
         <option value="$PROJECT_DIR$/gym_blocks/envs/blocks_env.py" />
+        <option value="$PROJECT_DIR$/agent3.py" />
+        <option value="$PROJECT_DIR$/run-agent2.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="44" />
     <option name="y" value="23" />
-    <option name="width" value="1393" />
+    <option name="width" value="1396" />
     <option name="height" value="877" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -213,6 +223,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Blocks" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/gym_blocks/envs/blocks_env.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="agent3" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="Blocks" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/agent3.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -351,18 +378,20 @@
       <option name="USE_KEYWORD" value="false" />
       <method />
     </configuration>
-    <list size="4">
+    <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.__init__" />
       <item index="1" class="java.lang.String" itemvalue="Python.blocks-env" />
       <item index="2" class="java.lang.String" itemvalue="Python.run-agent2" />
       <item index="3" class="java.lang.String" itemvalue="Python.blocks_env" />
+      <item index="4" class="java.lang.String" itemvalue="Python.agent3" />
     </list>
     <recent_temporary>
-      <list size="4">
+      <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python.run-agent2" />
-        <item index="1" class="java.lang.String" itemvalue="Python.blocks_env" />
-        <item index="2" class="java.lang.String" itemvalue="Python.blocks-env" />
-        <item index="3" class="java.lang.String" itemvalue="Python.__init__" />
+        <item index="1" class="java.lang.String" itemvalue="Python.agent3" />
+        <item index="2" class="java.lang.String" itemvalue="Python.blocks_env" />
+        <item index="3" class="java.lang.String" itemvalue="Python.blocks-env" />
+        <item index="4" class="java.lang.String" itemvalue="Python.__init__" />
       </list>
     </recent_temporary>
   </component>
@@ -381,18 +410,26 @@
       <option name="presentableId" value="Default" />
       <updated>1486131260556</updated>
     </task>
+    <task id="LOCAL-00001" summary="Again trying to commit new env">
+      <created>1489156977330</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1489156977330</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="44" y="23" width="1393" height="877" extended-state="6" />
-    <editor active="true" />
+    <frame x="44" y="23" width="1396" height="877" extended-state="0" />
+    <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.09117014" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.42821783" sideWeight="0.50716335" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32920793" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32920793" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31683168" sideWeight="0.49283668" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.35519803" sideWeight="0.49283668" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -414,9 +451,9 @@
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32920793" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32920793" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.5717822" sideWeight="0.49283668" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.47772276" sideWeight="0.49283668" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295129" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -427,6 +464,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Again trying to commit new env" />
+    <option name="LAST_COMMIT_MESSAGE" value="Again trying to commit new env" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -461,7 +502,10 @@
         <state relative-caret-position="4410">
           <caret line="294" column="9" lean-forward="false" selection-start-line="294" selection-start-column="9" selection-end-line="294" selection-end-column="9" />
           <folding>
-            <element signature="e#1#19#0" expanded="true" />
+            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#1988#2150#0" expanded="false" />
+            <element signature="e#2209#2709#0" expanded="false" />
+            <element signature="e#3318#3480#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -494,6 +538,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1800">
           <caret line="125" column="0" lean-forward="false" selection-start-line="125" selection-start-column="0" selection-end-line="125" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -512,7 +557,10 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#1#19#0" expanded="true" />
+            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#1988#2150#0" expanded="false" />
+            <element signature="e#2209#2709#0" expanded="false" />
+            <element signature="e#3318#3480#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -581,6 +629,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="122">
           <caret line="319" column="0" lean-forward="false" selection-start-line="319" selection-start-column="0" selection-end-line="319" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -620,6 +669,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="211">
           <caret line="76" column="23" lean-forward="false" selection-start-line="76" selection-start-column="16" selection-end-line="76" selection-end-column="23" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -628,36 +678,6 @@
         <state relative-caret-position="30">
           <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run-agent.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="25" column="18" lean-forward="false" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actor_critic.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" column="25" lean-forward="true" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run-agent2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="50" lean-forward="false" selection-start-line="17" selection-start-column="50" selection-end-line="17" selection-end-column="50" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -671,10 +691,53 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gym_blocks/envs/blocks_env.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="309" column="16" lean-forward="false" selection-start-line="309" selection-start-column="12" selection-end-line="309" selection-end-column="16" />
+        <state relative-caret-position="465">
+          <caret line="31" column="31" lean-forward="true" selection-start-line="31" selection-start-column="31" selection-end-line="31" selection-end-column="31" />
           <folding>
-            <element signature="e#1#19#0" expanded="true" />
+            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#1988#2150#0" expanded="false" />
+            <element signature="e#2209#2709#0" expanded="false" />
+            <element signature="e#3318#3480#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actor_critic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-315">
+          <caret line="10" column="25" lean-forward="true" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run-agent.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="25" column="18" lean-forward="false" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="18" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/agent3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="73" column="0" lean-forward="false" selection-start-line="73" selection-start-column="0" selection-end-line="73" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run-agent2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="232">
+          <caret line="87" column="12" lean-forward="false" selection-start-line="87" selection-start-column="12" selection-end-line="87" selection-end-column="12" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>
