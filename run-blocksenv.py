@@ -1,14 +1,14 @@
+import logging
 import sys
-import pandas as pd
-import numpy as np
 
 import gym
-import logging
-
-import yaml
-
-from gym_blocks.agent.dqn_agents import DQNAgent
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import yaml
+from keras import backend as K
+
+from gym_blocks.dqn_agents import DQNAgent
 
 
 def load_from_yaml(file_name):
@@ -32,25 +32,40 @@ if __name__ == "__main__":
     env.configure(raw_map_start, raw_map_final, run_params['state_size'])
 
     mean_rewards = []
+    actions = []
     for e in range(run_params['episodes']):
         observation = env.reset()
         current_rewards = []
         for time in range(run_params['max_steps']):
+            #x = np.ndarray(shape=(1, 1, 1800)).astype(K.floatx())
             action = agent.act(observation)
+            actions.append(action)
+
             logger.info("Chosen: {}".format(action))
             next_observation, reward, done, _ = env.step(action)
             logger.info("Reward: {}".format(reward))
-            reward = reward if not done else -10
+            #reward = reward if not done else 10
+            current_rewards.append(reward)
+
+            if action < 4 and reward < np.mean(current_rewards):
+                reward = 0
+            if action > 4 and reward < current_rewards[-1]:
+                reward = 0
+            if action == np.mean(actions[-1:-5]):
+                reward = 0
+            if np.sum(next_observation-observation) == 0:
+                reward = 0
+
 
             agent.remember(observation, action, reward, next_observation, done)
-            current_rewards.append(reward)
+
             observation = next_observation
             if done:
-                logger.info("Agent reach goal: episode={}/{}, steps={}"
-                            .format(e, run_params['episodes'], time))
+                logger.info("Agent reach goal: episode={}/{}, steps={}".format(e, run_params['episodes'], time))
                 break
         logger.info("Agent didn't reach goal")
         mean_rewards.append(np.mean(current_rewards))
-        agent.replay(32)
+        agent.replay(150)
+        print("End: {}".format(e))
     plt.plot(mean_rewards)
     plt.show()

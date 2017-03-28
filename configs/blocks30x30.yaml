@@ -1,4 +1,4 @@
 state_size: 900
 action_size: 8
-episodes: 100
-max_steps: 1000
+episodes: 50
+max_steps: 2000

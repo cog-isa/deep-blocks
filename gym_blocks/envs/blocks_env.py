@@ -246,6 +246,7 @@ class BlocksEnv(gym.Env):
         self.last_action = a
 
         self.state = self._preprocess_state(self.sit_current_map)
+        self.state = np.hstack((self.state, self.sit_final))
 
         if self.reward == 1:
             self.reset()

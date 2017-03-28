@@ -47,8 +47,8 @@ class DQNAgent:
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Conv1D(16, 1, input_shape = (1,1800)))
-        model.add(Flatten())
+        #model.add(Conv1D(16, 1, input_shape = (1,1800)))
+        #model.add(Flatten())
         model.add(Dense(20, input_dim=1800, activation='tanh'))
         model.add(Dropout(0.4))
         model.add(Dense(20, activation='tanh', init='uniform'))
