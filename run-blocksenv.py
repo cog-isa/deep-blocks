@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
-from keras import backend as K
 
 from gym_blocks.dqn_agents import DQNAgent
 
@@ -38,6 +37,7 @@ if __name__ == "__main__":
         current_rewards = []
         for time in range(run_params['max_steps']):
             #x = np.ndarray(shape=(1, 1, 1800)).astype(K.floatx())
+            observation = observation.reshape(1,1,1800)
             action = agent.act(observation)
             actions.append(action)
 
@@ -47,8 +47,9 @@ if __name__ == "__main__":
             #reward = reward if not done else 10
             current_rewards.append(reward)
 
-            if action < 4 and reward < np.mean(current_rewards):
-                reward = 0
+            if len(current_rewards) > 0:
+                if action < 4 and reward < np.mean(current_rewards):
+                    reward = 0
             if action > 4 and reward < current_rewards[-1]:
                 reward = 0
             if action == np.mean(actions[-1:-5]):
@@ -66,6 +67,6 @@ if __name__ == "__main__":
         logger.info("Agent didn't reach goal")
         mean_rewards.append(np.mean(current_rewards))
         agent.replay(150)
-        print("End: {}".format(e))
+        print("End Replay: {}".format(e))
     plt.plot(mean_rewards)
     plt.show()
