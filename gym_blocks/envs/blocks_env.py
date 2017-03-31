@@ -20,6 +20,7 @@ logger = logging.getLogger()
 
 
 class BlocksEnv(gym.Env):
+    metadata = {'render.modes': ['human', 'ansi']}
     def __init__(self):
         self.action_space = Discrete(8)
 
@@ -94,7 +95,7 @@ class BlocksEnv(gym.Env):
                     if self.hand_position[1] > 1:
                         if current_map[self.hand_position[0]][self.hand_position[1] - 3] == 0:
                             make_zero(self.hand_position[0], self.hand_position[1])
-                            self.hand_position[1] = self.hand_position[1] - 3
+                            self.hand_position[1] -= 3
                             make_ones(self.hand_position[0], self.hand_position[1])
 
                 elif self.hand_position[0] == 25:
@@ -104,15 +105,22 @@ class BlocksEnv(gym.Env):
                             self.hand_position[1] = self.hand_position[1] - 3
                             make_ones(self.hand_position[0], self.hand_position[1])
 
-                else:
-                    if self.hand_position[1] > 1:
-                        if (current_map[self.hand_position[0] + 3][self.hand_position[1]] == 0) or (
-                                        current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1 and
-                                        current_map[self.hand_position[0] + 6][
-                                            self.hand_position[1]] == 1):
+                elif self.hand_position[1] > 1:
+                    if current_map[self.hand_position[0] + 3][self.hand_position[1]] == 0:
+                        if current_map[self.hand_position[0]][self.hand_position[1]-3] == 0:
                             make_zero(self.hand_position[0], self.hand_position[1])
-                            self.hand_position[1] = self.hand_position[1] - 3
+                            self.hand_position[1] -= 3
                             make_ones(self.hand_position[0], self.hand_position[1])
+
+                elif self.hand_position[1] > 1:
+                    if current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1 \
+                     and current_map[self.hand_position[0] + 6][self.hand_position[1]] == 1:
+                        if current_map[self.hand_position[0]][self.hand_position[1]-3] == 0:
+                            make_zero(self.hand_position[0], self.hand_position[1])
+                            self.hand_position[1] -= 3
+                            make_ones(self.hand_position[0], self.hand_position[1])
+                else:
+                    pass
 
             elif action == 1:
                 if self.hand_position[0] < 26:

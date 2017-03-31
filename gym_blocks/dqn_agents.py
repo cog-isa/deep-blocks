@@ -5,6 +5,7 @@ import numpy as np
 from keras.layers import Conv1D, Flatten, Dense, Dropout, LSTM
 from keras.models import Sequential
 from keras.optimizers import RMSprop
+from matplotlib import pyplot as plt
 
 
 class DQNAgent:
@@ -21,13 +22,13 @@ class DQNAgent:
         self.output_dim = 8
 
     def _build_model(self):
-        # Neural Net for Deep-Q learning Model
+        #Neural Net for Deep-Q learning Model
         model = Sequential()
-        #model.add(LSTM(output_dim=(100), input_shape = (1, 1800)))
-        model.add(Conv1D(4, 1, input_shape=(1, 1800)))
-        model.add(Flatten())
+        model.add(LSTM(output_dim=(100), input_shape = (1, 1800)))
+        #model.add(Conv1D(4, 1, input_shape=(1, 1800)))
+        #model.add(Flatten())
         model.add(Dense(1000, input_dim=100, activation='tanh'))
-        model.add(Dropout(0.1))
+        model.add(Dropout(0.25))
         model.add(Dense(100, activation='tanh', init='uniform'))
 
         model.add(Dense(self.action_size, activation='linear'))
@@ -46,10 +47,14 @@ class DQNAgent:
 
     def replay(self, batch_size):
         batch_size = min(batch_size, len(self.memory))
-        minibatch = random.sample(self.memory, batch_size)
-        X = np.zeros((batch_size, 1800))
-        Y = np.zeros((batch_size, self.action_size))
-        for i in range(batch_size):
+        minibatch = self.memory
+        minibatch = list(minibatch)[-2000:-1]
+        random.shuffle(minibatch, random.random)
+        #minibatch = list(random.shuffle(self.memory))
+        X = np.zeros((2000, 1800))
+        Y = np.zeros((2000, self.action_size))
+        print(len(minibatch))
+        for i in range(len(minibatch)):
             state, action, reward, next_state, done = minibatch[i]
             target = self.model.predict(state.reshape(1,1,1800))[0]
             if done:
@@ -59,11 +64,43 @@ class DQNAgent:
                                           np.amax(self.model.predict(next_state.reshape(1,1,1800))[0])
             state = state.reshape(1,1,1800)
             X[i], Y[i] = state, target
-        X = X.reshape(150,1,1800)
-        self.model.fit(X, Y, batch_size=batch_size, verbose=1, nb_epoch=5)
+        X = X.reshape(2000,1,1800)
+        self.fitted = self.model.fit(X, Y, batch_size=batch_size, verbose=1, nb_epoch=5)
+        print("Fitted ")
         if self.epsilon > self.e_min:
             self.epsilon *= self.e_decay
 
+
+    # def replay(self, batch_size):
+    #     batch_size = min(batch_size, len(self.memory))
+    #     minibatch = random.sample(self.memory, batch_size)
+    #     X = np.zeros((batch_size, 1800))
+    #     Y = np.zeros((batch_size, self.action_size))
+    #     for i in range(batch_size):
+    #         state, action, reward, next_state, done = minibatch[i]
+    #         target = self.model.predict(state.reshape(1,1,1800))[0]
+    #         if done:
+    #             target[action] = reward
+    #         else:
+    #             target[action] = reward + self.gamma * \
+    #                                       np.amax(self.model.predict(next_state.reshape(1,1,1800))[0])
+    #         state = state.reshape(1,1,1800)
+    #         X[i], Y[i] = state, target
+    #     X = X.reshape(150,1,1800)
+    #     self.fitted =self.model.fit(X, Y, batch_size=batch_size, verbose=1, nb_epoch=5)
+    #     if self.epsilon > self.e_min:
+    #         self.epsilon *= self.e_decay
+
+
+    def plot_loss(self):
+        # summarize history for loss
+        plt.plot(self.fitted.history['loss'])
+        #plt.plot(self.fitted.history['val_loss'])
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+        plt.show()
 
     def load(self, name):
         self.model.load_weights(name)

@@ -35,11 +35,17 @@ if __name__ == "__main__":
     for e in range(run_params['episodes']):
         observation = env.reset()
         current_rewards = []
+        k = 11
         for time in range(run_params['max_steps']):
             #x = np.ndarray(shape=(1, 1, 1800)).astype(K.floatx())
             observation = observation.reshape(1,1,1800)
             action = agent.act(observation)
             actions.append(action)
+            #print("Action:", action, "Blocks: ", (np.sum(observation)-104)/9)
+            if(np.sum(observation)-104)/9 < k:
+                env.render()
+                k=(np.sum(observation)-104)/9
+
 
             logger.info("Chosen: {}".format(action))
             next_observation, reward, done, _ = env.step(action)
@@ -52,13 +58,14 @@ if __name__ == "__main__":
                     reward = 0
             if action > 4 and reward < current_rewards[-1]:
                 reward = 0
-            if action == np.mean(actions[-1:-5]):
+            if action == np.mean(actions[-4:-1]):
                 reward = 0
             if np.sum(next_observation-observation) == 0:
                 reward = 0
+            current_rewards.append(reward)
 
 
-            agent.remember(observation, action, reward, next_observation, done)
+            agent.remember(observation, action, reward - current_rewards[-2], next_observation, done)
 
             observation = next_observation
             if done:
@@ -68,5 +75,7 @@ if __name__ == "__main__":
         mean_rewards.append(np.mean(current_rewards))
         agent.replay(150)
         print("End Replay: {}".format(e))
-    plt.plot(mean_rewards)
-    plt.show()
+    #plt.plot(mean_rewards)
+    env.render()
+    #plt.show()
+    agent.plot_loss()
