@@ -6,7 +6,14 @@ from keras.layers import Conv1D, Flatten, Dense, Dropout, LSTM
 from keras.models import Sequential
 from keras.optimizers import RMSprop
 from matplotlib import pyplot as plt
+import keras
 
+class LossHistory(keras.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        self.losses = []
+
+    def on_batch_end(self, batch, logs={}):
+        self.losses.append(logs.get('loss'))
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
@@ -65,7 +72,7 @@ class DQNAgent:
             state = state.reshape(1,1,1800)
             X[i], Y[i] = state, target
         X = X.reshape(2000,1,1800)
-        self.fitted = self.model.fit(X, Y, batch_size=batch_size, verbose=1, nb_epoch=5)
+        self.fitted = self.model.fit(X, Y, batch_size=batch_size, verbose=0, nb_epoch=5)
         print("Fitted ")
         if self.epsilon > self.e_min:
             self.epsilon *= self.e_decay
@@ -95,10 +102,10 @@ class DQNAgent:
     def plot_loss(self):
         # summarize history for loss
         plt.plot(self.fitted.history['loss'])
-        #plt.plot(self.fitted.history['val_loss'])
+        #plt.plot(history.losses)
         plt.title('model loss')
         plt.ylabel('loss')
-        plt.xlabel('epoch')
+        plt.xlabel('episodes')
         plt.legend(['train', 'test'], loc='upper left')
         plt.show()
 

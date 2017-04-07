@@ -217,7 +217,7 @@ class BlocksEnv(gym.Env):
                     if (x[3 * i + 1][3 * k + 1] == 1) and (x[3 * i + 1][3 * k + 2] == 0) and (x[3 * i + 1][3 * k] == 0):
                         return i, k
 
-        def find_cubes(x):  # returns current hand center's location
+        def find_cubes(x):  # returns N of cubes
             s = 0
             for i in range(10):
                 for k in range(10):
@@ -260,7 +260,10 @@ class BlocksEnv(gym.Env):
             self.reset()
             return self.state, self.reward, 1, 0  # third param means "game over"
         logger.debug("END STEP\n")
-        return self.state, self.reward, 0, 0
+        return self.state, self.reward, 0, self.hand_position
+
+
+
 
     def _render(self, mode='human', close=False):
         if close:
