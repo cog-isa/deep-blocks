@@ -39,6 +39,7 @@ def get_distance(map, target, hand_position):
 
     print(len(dif), np.sum(np.abs(sum(dif))))
 
+
 def preprocess_state(map):
     raveled = map.astype(np.float).ravel()
     return np.reshape(raveled, [1, 900])
@@ -68,28 +69,34 @@ if __name__ == "__main__":
     env = gym.make('Blocks-v0')
     env.configure(raw_map_start, raw_map_final, run_params['state_size'])
     games_won = 0
+    subtarget1 = 0
+    subtarget2 = 0
+    subtarget3 = 0
+    subtarget4 = 0
+
     mean_rewards = []
     actions = []
-
     for e in range(run_params['episodes']):
         observation = env.reset()
         current_rewards = [0]
         k = 11
+        done1 = False
+        done2 = False
+        done3 = False
+        done4 = False
 
         for time in range(run_params['max_steps']):
             observation = observation.reshape(1,1,1800)
             action = agent.act(observation)
             actions.append(action)
-            #print("Action:", action, "Blocks: ", (np.sum(observation)-104)/9)
             if(np.sum(observation)-104)/9 < k:
                 env.render()
                 k=(np.sum(observation)-104)/9
 
-
             logger.info("Chosen: {}".format(action))
             next_observation, reward, done, hand_position = env.step(action)
             logger.info("Reward: {}".format(reward))
-            if reward == 1: games_won+=1
+            if reward == 1: games_won += 1
 
             if len(current_rewards) > 0:
                 if action < 4 and reward < np.mean(current_rewards):
@@ -102,35 +109,42 @@ if __name__ == "__main__":
             if np.sum(next_observation-observation) == 0:
                 reward = 0
 
-
-            done1 = False
-            done2 = False
-            done3 = False
-            done4 = False
+            #
+            # done1 = False
+            # done2 = False
+            # done3 = False
+            # done4 = False
 
 
             if done1 == False:
                 if get_distance(next_observation, raw_map_mid01, hand_position)==True:
                     done1 = True
                     reward = 1
+                    subtarget1 +=1
                 else: reward = get_distance(next_observation, raw_map_mid01, hand_position)
 
             if done2 == False:
                 if get_distance(next_observation, raw_map_mid02, hand_position)==True:
                     done2 = True
                     reward = 1
+                    subtarget2 +=1
+
                 else: reward = get_distance(next_observation, raw_map_mid02, hand_position)
 
             if done3 == False:
                 if get_distance(next_observation, raw_map_mid03, hand_position)==True:
                     done3 = True
                     reward = 1
+                    subtarget3 +=1
+
                 else: reward = get_distance(next_observation, raw_map_mid03, hand_position)
 
             if done4 == False:
                 if get_distance(next_observation, raw_map_mid04, hand_position)==True:
                     done4 = True
                     reward = 1
+                    subtarget4 +=1
+
                 else: reward = get_distance(next_observation, raw_map_mid04, hand_position)
 
 
@@ -148,5 +162,5 @@ if __name__ == "__main__":
     #plt.plot(mean_rewards)
     #env.render()
     #plt.show()
+    print("Won:", games_won, "games", subtarget1, subtarget2, subtarget3, subtarget4)
     agent.plot_loss()
-    print("Won:", games_won, "games")
