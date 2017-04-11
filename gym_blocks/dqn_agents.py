@@ -60,10 +60,10 @@ class DQNAgent:
         #minibatch = list(random.shuffle(self.memory))
         X = np.zeros((2000, 1800))
         Y = np.zeros((2000, self.action_size))
-        print(len(minibatch))
         for i in range(len(minibatch)):
             state, action, reward, next_state, done = minibatch[i]
             target = self.model.predict(state.reshape(1,1,1800))[0]
+
             if done:
                 target[action] = reward
             else:
