@@ -35,6 +35,7 @@ class BlocksEnv(gym.Env):
         self.sit_final_map = raw_map_final
         self.last_action = None
         self.reward = None
+        self.step_n = 0
 
     def _reset(self):
         return self.state
@@ -258,8 +259,18 @@ class BlocksEnv(gym.Env):
 
         if self.reward == 1:
             self.reset()
+            self.step_n = 1
             return self.state, self.reward, 1, 0  # third param means "game over"
         logger.debug("END STEP\n")
+
+
+        if  self.step_n == 100:
+            self.reset()
+            self.step_n = 1
+            return self.state, 0, 1, 0  # third param means "game over"
+
+
+        self.step_n +=1
         return self.state, self.reward, 0, self.hand_position
 
 
