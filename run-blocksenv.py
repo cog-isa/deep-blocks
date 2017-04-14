@@ -22,7 +22,7 @@ def get_distance(map, target, hand_position):
 
     for i in range(10):
         for j in range(10):
-            if dif[3*i+1,3*j+1]==-1 and dif[3*i,3*j]==-1:
+            if dif[3*i+1,3*j+1]==-1:
                 target_position = (i,j)
     cube_position = list(cube_position)
     target_position = list(target_position)
@@ -100,14 +100,14 @@ if __name__ == "__main__":
 
             if len(current_rewards) > 0:
                 if action < 4 and reward < np.mean(current_rewards):
-                    reward = 0
+                    reward = -1
             if len(current_rewards)>5:
                 if action > 4 and reward < current_rewards[-1]:
-                    reward = 0
+                    reward = -1
             if action == np.mean(actions[-4:-1]):
-                reward = 0
+                reward = -1
             if np.sum(next_observation-observation) == 0:
-                reward = 0
+                reward = -1
 
             #
             # done1 = False
@@ -159,6 +159,8 @@ if __name__ == "__main__":
         mean_rewards.append(np.mean(current_rewards))
         agent.replay(150)
         print("End Replay: {}".format(e))
+        print("Won:", games_won, "games", subtarget1, subtarget2, subtarget3, subtarget4)
+
     #plt.plot(mean_rewards)
     #env.render()
     #plt.show()

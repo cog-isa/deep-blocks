@@ -15,6 +15,7 @@ class LossHistory(keras.callbacks.Callback):
     def on_batch_end(self, batch, logs={}):
         self.losses.append(logs.get('loss'))
 
+
 class DQNAgent:
     def __init__(self, state_size, action_size):
         self.state_size = state_size
@@ -27,16 +28,19 @@ class DQNAgent:
         self.learning_rate = 0.01
         self.model = self._build_model()
         self.output_dim = 8
+        self.losses = []
 
     def _build_model(self):
         #Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(LSTM(output_dim=(100), input_shape = (1, 1800)))
+        model.add(LSTM(output_dim=(200),return_sequences=True, input_shape = (1, 1800)))
+        model.add(LSTM(output_dim=(200)))
+
         #model.add(Conv1D(4, 1, input_shape=(1, 1800)))
         #model.add(Flatten())
-        model.add(Dense(1000, input_dim=100, activation='tanh'))
+        model.add(Dense(2000, input_dim=200, activation='tanh'))
         model.add(Dropout(0.25))
-        model.add(Dense(100, activation='tanh', init='uniform'))
+        model.add(Dense(200, activation='tanh', init='uniform'))
 
         model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss='mse',
@@ -65,14 +69,17 @@ class DQNAgent:
             target = self.model.predict(state.reshape(1,1,1800))[0]
 
             if done:
-                target[action] = reward
+                 target[action] = reward
             else:
-                target[action] = reward + self.gamma * \
-                                          np.amax(self.model.predict(next_state.reshape(1,1,1800))[0])
+                 target[action] = reward + self.gamma * \
+                                           np.amax(self.model.predict(next_state.reshape(1,1,1800))[0])
             state = state.reshape(1,1,1800)
             X[i], Y[i] = state, target
         X = X.reshape(2000,1,1800)
-        self.fitted = self.model.fit(X, Y, batch_size=batch_size, verbose=0, nb_epoch=5)
+
+        self.fitted = self.model.fit(X, Y, batch_size=batch_size, verbose=0, epochs=5)
+
+        self.losses.append(self.fitted.history['loss'])
         print("Fitted ")
         if self.epsilon > self.e_min:
             self.epsilon *= self.e_decay
@@ -101,11 +108,11 @@ class DQNAgent:
 
     def plot_loss(self):
         # summarize history for loss
-        plt.plot(self.fitted.history['loss'])
+        plt.plot(self.losses)
         #plt.plot(history.losses)
         plt.title('model loss')
         plt.ylabel('loss')
-        plt.xlabel('episodes')
+        #plt.xlabel('episodes')
         plt.legend(['train', 'test'], loc='upper left')
         plt.show()
 
