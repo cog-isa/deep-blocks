@@ -5,9 +5,25 @@ import gym
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy.misc
 import yaml
-
+from slideshow import slideshows
 from gym_blocks.dqn_agents import DQNAgent
+
+
+def draw(state,time,e):
+    # Create a 1024x1024x3 array of 8 bit unsigned integers
+    data = np.zeros((900, 900, 3), dtype=np.uint8)
+    #img = scipy.misc.imsave("pic.bmp", data)  # Create a PIL image
+    #img.show()
+    state = state[0][:900]
+    for i in range(900):
+        if state[i] == 1:
+            m = i//30
+            n = i%30
+            data[30*m:30*m+30, 30*n:30*n+30] = [254, 0, 0]  # Makes the middle pixel red
+    #data[512, 513] = [0, 0, 255]  # Makes the next pixel blue
+    scipy.misc.imsave(str(e)+str(time)+"pic.bmp", data)  # Create a PIL image
 
 
 def get_distance(map, target, hand_position):
@@ -74,7 +90,6 @@ if __name__ == "__main__":
     subtarget3 = 0
     subtarget4 = 0
 
-    mean_rewards = []
     actions = []
     for e in range(run_params['episodes']):
         observation = env.reset()
@@ -95,6 +110,7 @@ if __name__ == "__main__":
 
             logger.info("Chosen: {}".format(action))
             next_observation, reward, done, hand_position = env.step(action)
+            draw(next_observation,time,e)
             logger.info("Reward: {}".format(reward))
             if reward == 1: games_won += 1
 
@@ -108,13 +124,6 @@ if __name__ == "__main__":
                 reward = -1
             if np.sum(next_observation-observation) == 0:
                 reward = -1
-
-            #
-            # done1 = False
-            # done2 = False
-            # done3 = False
-            # done4 = False
-
 
             if done1 == False:
                 if get_distance(next_observation, raw_map_mid01, hand_position)==True:
@@ -150,18 +159,18 @@ if __name__ == "__main__":
 
             agent.remember(observation, action, reward - current_rewards[-1], next_observation, done)
             current_rewards.append(reward)
-
             observation = next_observation
+
             if done:
                 logger.info("Agent reach goal: episode={}/{}, steps={}".format(e, run_params['episodes'], time))
                 break
+
         logger.info("Agent didn't reach goal")
-        mean_rewards.append(np.mean(current_rewards))
+        slideshows()
         agent.replay(150)
         print("End Replay: {}".format(e))
         print("Won:", games_won, "games", subtarget1, subtarget2, subtarget3, subtarget4)
 
-    #plt.plot(mean_rewards)
     #env.render()
     #plt.show()
     print("Won:", games_won, "games", subtarget1, subtarget2, subtarget3, subtarget4)

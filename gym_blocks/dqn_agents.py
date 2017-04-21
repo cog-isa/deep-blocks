@@ -77,7 +77,7 @@ class DQNAgent:
             X[i], Y[i] = state, target
         X = X.reshape(2000,1,1800)
 
-        self.fitted = self.model.fit(X, Y, batch_size=batch_size, verbose=0, epochs=5)
+        self.fitted = self.model.fit(X, Y, batch_size=batch_size, verbose=0, nb_epoch=5)
 
         self.losses.append(self.fitted.history['loss'])
         print("Fitted ")
