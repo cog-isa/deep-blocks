@@ -20,6 +20,7 @@ logger = logging.getLogger()
 
 
 class BlocksEnv(gym.Env):
+    metadata = {'render.modes': ['human', 'ansi']}
     def __init__(self):
         self.action_space = Discrete(8)
 
@@ -34,6 +35,7 @@ class BlocksEnv(gym.Env):
         self.sit_final_map = raw_map_final
         self.last_action = None
         self.reward = None
+        self.step_n = 0
 
     def _reset(self):
         return self.state
@@ -94,7 +96,7 @@ class BlocksEnv(gym.Env):
                     if self.hand_position[1] > 1:
                         if current_map[self.hand_position[0]][self.hand_position[1] - 3] == 0:
                             make_zero(self.hand_position[0], self.hand_position[1])
-                            self.hand_position[1] = self.hand_position[1] - 3
+                            self.hand_position[1] -= 3
                             make_ones(self.hand_position[0], self.hand_position[1])
 
                 elif self.hand_position[0] == 25:
@@ -104,15 +106,22 @@ class BlocksEnv(gym.Env):
                             self.hand_position[1] = self.hand_position[1] - 3
                             make_ones(self.hand_position[0], self.hand_position[1])
 
-                else:
-                    if self.hand_position[1] > 1:
-                        if (current_map[self.hand_position[0] + 3][self.hand_position[1]] == 0) or (
-                                        current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1 and
-                                        current_map[self.hand_position[0] + 6][
-                                            self.hand_position[1]] == 1):
+                elif self.hand_position[1] > 1:
+                    if current_map[self.hand_position[0] + 3][self.hand_position[1]] == 0:
+                        if current_map[self.hand_position[0]][self.hand_position[1]-3] == 0:
                             make_zero(self.hand_position[0], self.hand_position[1])
-                            self.hand_position[1] = self.hand_position[1] - 3
+                            self.hand_position[1] -= 3
                             make_ones(self.hand_position[0], self.hand_position[1])
+
+                elif self.hand_position[1] > 1:
+                    if current_map[self.hand_position[0] + 3][self.hand_position[1]] == 1 \
+                     and current_map[self.hand_position[0] + 6][self.hand_position[1]] == 1:
+                        if current_map[self.hand_position[0]][self.hand_position[1]-3] == 0:
+                            make_zero(self.hand_position[0], self.hand_position[1])
+                            self.hand_position[1] -= 3
+                            make_ones(self.hand_position[0], self.hand_position[1])
+                else:
+                    pass
 
             elif action == 1:
                 if self.hand_position[0] < 26:
@@ -209,7 +218,7 @@ class BlocksEnv(gym.Env):
                     if (x[3 * i + 1][3 * k + 1] == 1) and (x[3 * i + 1][3 * k + 2] == 0) and (x[3 * i + 1][3 * k] == 0):
                         return i, k
 
-        def find_cubes(x):  # returns current hand center's location
+        def find_cubes(x):  # returns N of cubes
             s = 0
             for i in range(10):
                 for k in range(10):
@@ -234,13 +243,13 @@ class BlocksEnv(gym.Env):
         if self.last_action:
             if (a == 3) and (int(self.last_action) % 8 > 3): rew = 1.05 * rew  # increase rew for rational movements
             # assign zero reward for absolutely silly steps
-            if (a == 1) and (int(self.last_action) % 8 > 3): rew = 0
-            if (a == 3) and (int(self.last_action) % 8 == 7): rew = 0
-            if (a == 4) and (int(self.last_action) % 8 == 1): rew = 0
-            if (a == 1) and (int(self.last_action) % 8 == 3): rew = 0
-            if (a == 3) and (int(self.last_action) % 8 == 1): rew = 0
-            if (a == 0) and (int(self.last_action) % 8 == 2): rew = 0
-            if (a == 2) and (int(self.last_action) % 8 == 0): rew = 0
+            if (a == 1) and (int(self.last_action) % 8 > 3): rew = -1
+            if (a == 3) and (int(self.last_action) % 8 == 7): rew = -1
+            if (a == 4) and (int(self.last_action) % 8 == 1): rew = -1
+            if (a == 1) and (int(self.last_action) % 8 == 3): rew = -1
+            if (a == 3) and (int(self.last_action) % 8 == 1): rew = -1
+            if (a == 0) and (int(self.last_action) % 8 == 2): rew = -1
+            if (a == 2) and (int(self.last_action) % 8 == 0): rew = -1
 
         self.reward = rew
         self.last_action = a
@@ -250,9 +259,22 @@ class BlocksEnv(gym.Env):
 
         if self.reward == 1:
             self.reset()
-            return self.state, self.reward, 1, 0  # third param means "game over"
+            self.step_n = 1
+            return self.state, self.reward, 1, self.hand_position  # third param means "game over"
         logger.debug("END STEP\n")
-        return self.state, self.reward, 0, 0
+
+
+        if  self.step_n == 100:
+            self.reset()
+            self.step_n = 1
+            return self.state, 0, 1,self.hand_position  # third param means "game over"
+
+
+        self.step_n +=1
+        return self.state, self.reward, 0, self.hand_position
+
+
+
 
     def _render(self, mode='human', close=False):
         if close:
