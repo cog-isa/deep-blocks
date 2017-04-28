@@ -1,29 +1,18 @@
 import logging
 import sys
 
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
 import gym
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy.misc
 import yaml
-from slideshow import slideshows
+#from slideshow import slideshows
 from gym_blocks.dqn_agents import DQNAgent
-
-
-def draw(state,time,e):
-    # Create a 1024x1024x3 array of 8 bit unsigned integers
-    data = np.zeros((900, 900, 3), dtype=np.uint8)
-    #img = scipy.misc.imsave("pic.bmp", data)  # Create a PIL image
-    #img.show()
-    state = state[0][:900]
-    for i in range(900):
-        if state[i] == 1:
-            m = i//30
-            n = i%30
-            data[30*m:30*m+30, 30*n:30*n+30] = [254, 0, 0]  # Makes the middle pixel red
-    #data[512, 513] = [0, 0, 255]  # Makes the next pixel blue
-    scipy.misc.imsave(str(e)+str(time)+"pic.bmp", data)  # Create a PIL image
+from pics.slideshow import draw
 
 
 def get_distance(map, target, hand_position):
@@ -49,9 +38,9 @@ def get_distance(map, target, hand_position):
 
     if cube_position == target_position: return True
     elif cube_position[0]-3 == hand_position[0] and cube_position[1] == hand_position[1]: #проверяем чтобы кубик который нужно передвинуть находился под рукой
-        return np.sqrt((cube_position[0]-target_position[0])**2 + (cube_position[0]-target_position[0])**2)/np.sqrt(2)*30
+        return np.sqrt((cube_position[0]-target_position[0])**2 + (cube_position[0]-target_position[0])**2)/(np.sqrt(2)*30)
     else:
-        return np.sqrt((cube_position[0]-hand_position[0])**2 + (cube_position[0]-hand_position[0])**2)/np.sqrt(2)*30
+        return np.sqrt((cube_position[0]-hand_position[0])**2 + (cube_position[0]-hand_position[0])**2)/(np.sqrt(2)*30)
 
     print(len(dif), np.sum(np.abs(sum(dif))))
 
@@ -75,6 +64,7 @@ if __name__ == "__main__":
     run_params = load_from_yaml(sys.argv[1])
 
     agent = DQNAgent(run_params['state_size'], run_params['action_size'])
+
     raw_map_start = load_from_csv(sys.argv[2])
     raw_map_final = load_from_csv(sys.argv[3])
     raw_map_mid01 = preprocess_state(load_from_csv(sys.argv[4]))
@@ -84,6 +74,7 @@ if __name__ == "__main__":
 
     env = gym.make('Blocks-v0')
     env.configure(raw_map_start, raw_map_final, run_params['state_size'])
+
     games_won = 0
     subtarget1 = 0
     subtarget2 = 0
@@ -91,6 +82,7 @@ if __name__ == "__main__":
     subtarget4 = 0
 
     actions = []
+
     for e in range(run_params['episodes']):
         observation = env.reset()
         current_rewards = [0]
@@ -109,8 +101,11 @@ if __name__ == "__main__":
                 k=(np.sum(observation)-104)/9
 
             logger.info("Chosen: {}".format(action))
+
             next_observation, reward, done, hand_position = env.step(action)
             draw(next_observation,time,e)
+
+
             logger.info("Reward: {}".format(reward))
             if reward == 1: games_won += 1
 
@@ -130,7 +125,9 @@ if __name__ == "__main__":
                     done1 = True
                     reward = 1
                     subtarget1 +=1
-                else: reward = get_distance(next_observation, raw_map_mid01, hand_position)
+                else:
+                    reward = get_distance(next_observation, raw_map_mid01, hand_position)
+                    print(reward)
 
             if done2 == False:
                 if get_distance(next_observation, raw_map_mid02, hand_position)==True:
@@ -156,17 +153,17 @@ if __name__ == "__main__":
 
                 else: reward = get_distance(next_observation, raw_map_mid04, hand_position)
 
-
             agent.remember(observation, action, reward - current_rewards[-1], next_observation, done)
+
             current_rewards.append(reward)
             observation = next_observation
 
             if done:
-                logger.info("Agent reach goal: episode={}/{}, steps={}".format(e, run_params['episodes'], time))
+                logger.info("Agent reach goal`: episode={}/{}, steps={}".format(e, run_params['episodes'], time))
                 break
 
         logger.info("Agent didn't reach goal")
-        slideshows()
+        #slideshows()
         agent.replay(150)
         print("End Replay: {}".format(e))
         print("Won:", games_won, "games", subtarget1, subtarget2, subtarget3, subtarget4)
