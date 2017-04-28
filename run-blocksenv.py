@@ -12,7 +12,7 @@ import scipy.misc
 import yaml
 #from slideshow import slideshows
 from gym_blocks.dqn_agents import DQNAgent
-from pics.slideshow import draw
+from rendering import draw
 
 
 def get_distance(map, target, hand_position):
