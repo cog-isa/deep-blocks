@@ -1,7 +1,8 @@
 import logging
 import sys
 
-#configs/blocks30x30.yaml data/map.csv data/target.csv data/target01.csv data/target02.csv data/target04.csv data/target05.csv
+#configs/blocks30x30.yaml data/map.csv data/target.csv data/target01.csv data/target02.csv data/target04.csv
+#  data/target05.csv
 
 import matplotlib
 matplotlib.use("TkAgg")
@@ -44,7 +45,7 @@ def get_distance(map, target, hand_position):
     else:
         return np.sqrt((cube_position[0]-hand_position[0])**2 + (cube_position[0]-hand_position[0])**2)/(np.sqrt(2)*30)
 
-    print(len(dif), np.sum(np.abs(sum(dif))))
+    print(len(dif), np.sum(np.abs(sum(dif)))) #reward calculation  for subtargets
 
 
 def preprocess_state(map):
@@ -61,12 +62,37 @@ def load_from_csv(file_name):
 
 
 if __name__ == "__main__":
-    logger = logging.getLogger()
+    #logging.basicConfig(filename='example.log', level=logging.DEBUG)
+
+
+    #hdlr = logging.FileHandler('/Users/Edward/PycharmProjects/New_Blocks/deep-blocks/myapp.log')
+
+
+    # create logger with 'spam_application'
+    logger = logging.getLogger('spam_application')
+    logger.setLevel(logging.DEBUG)
+    # create file handler which logs even debug messages
+    fh = logging.FileHandler('spam.log')
+    fh.setLevel(logging.DEBUG)
+    # create console handler with a higher log level
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.ERROR)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    # add the handlers to the logger
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+
+
+
 
     run_params = load_from_yaml(sys.argv[1])
 
-    agent = DQNAgent(run_params['state_size'], run_params['action_size'])
+    agent = DQNAgent(run_params['state_size'], run_params['action_size']) #agent's initialisation
 
+    #Loading initial, final and intermidiate states
     raw_map_start = load_from_csv(sys.argv[2])
     raw_map_final = load_from_csv(sys.argv[3])
     raw_map_mid01 = preprocess_state(load_from_csv(sys.argv[4]))
@@ -77,6 +103,7 @@ if __name__ == "__main__":
     env = gym.make('Blocks-v0')
     env.configure(raw_map_start, raw_map_final, run_params['state_size'])
 
+    # counters for targtets
     games_won = 0
     subtarget1 = 0
     subtarget2 = 0
@@ -88,7 +115,7 @@ if __name__ == "__main__":
     for e in range(run_params['episodes']):
         observation = env.reset()
         current_rewards = [0]
-        k = 11
+        #k = 11
         done1 = False
         done2 = False
         done3 = False
@@ -97,18 +124,19 @@ if __name__ == "__main__":
         for time in range(run_params['max_steps']):
             observation = observation.reshape(1,1,1800)
             action = agent.act(observation)
+            qvalues = agent.qvalues(observation)
             actions.append(action)
-            if(np.sum(observation)-104)/9 < k:
-                env.render()
-                k=(np.sum(observation)-104)/9
-
+            #if(np.sum(observation)-104)/9 < k:
+            #   env.render()
+            #  k=(np.sum(observation)-104)/9
+            logger.info("Start episode={}/{}, steps={}".format(e, run_params['episodes'], time))
             logger.info("Chosen: {}".format(action))
+            logger.info("Q-values: {}".format(qvalues))
 
             next_observation, reward, done, hand_position = env.step(action)
             draw(next_observation,time,e)
 
 
-            logger.info("Reward: {}".format(reward))
             if reward == 1: games_won += 1
 
             if len(current_rewards) > 0:
@@ -128,7 +156,7 @@ if __name__ == "__main__":
                     reward = 1
                     subtarget1 +=1
                 else:
-                    reward = get_distance(next_observation, raw_map_mid01, hand_position)
+                    reward = 1 - get_distance(next_observation, raw_map_mid01, hand_position)
                     print(reward)
 
             if done2 == False:
@@ -137,7 +165,7 @@ if __name__ == "__main__":
                     reward = 1
                     subtarget2 +=1
 
-                else: reward = get_distance(next_observation, raw_map_mid02, hand_position)
+                else: reward = 1 - get_distance(next_observation, raw_map_mid02, hand_position)
 
             if done3 == False:
                 if get_distance(next_observation, raw_map_mid03, hand_position)==True:
@@ -145,7 +173,7 @@ if __name__ == "__main__":
                     reward = 1
                     subtarget3 +=1
 
-                else: reward = get_distance(next_observation, raw_map_mid03, hand_position)
+                else: reward = 1 - get_distance(next_observation, raw_map_mid03, hand_position)
 
             if done4 == False:
                 if get_distance(next_observation, raw_map_mid04, hand_position)==True:
@@ -153,9 +181,11 @@ if __name__ == "__main__":
                     reward = 1
                     subtarget4 +=1
 
-                else: reward = get_distance(next_observation, raw_map_mid04, hand_position)
+                else: reward = 1 - get_distance(next_observation, raw_map_mid04, hand_position)
 
             agent.remember(observation, action, reward - current_rewards[-1], next_observation, done)
+
+            logger.info("Reward: {}".format(reward))
 
             current_rewards.append(reward)
             observation = next_observation
