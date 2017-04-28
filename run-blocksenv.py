@@ -1,6 +1,8 @@
 import logging
 import sys
 
+#configs/blocks30x30.yaml data/map.csv data/target.csv data/target01.csv data/target02.csv data/target04.csv data/target05.csv
+
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
