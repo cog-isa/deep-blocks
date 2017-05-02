@@ -21,28 +21,31 @@ class DQNAgent:
         self.state_size = state_size
         self.action_size = action_size
         self.memory = deque(maxlen=100000)
-        self.gamma = 0.9  # discount rate
-        self.epsilon = 1.0  # exploration rate
-        self.e_decay = .99
+        self.gamma = 0.5  # discount rate
+        self.epsilon = 0.5  # exploration rate
+        self.e_decay = .90
         self.e_min = 0.05
-        self.learning_rate = 0.01
+        self.learning_rate = 0.2
         self.model = self._build_model()
         self.output_dim = 8
         self.losses = []
+        self.X = np.zeros((2000, 1800))
+        self.Y = np.zeros((2000, 8))
 
     def _build_model(self):
         #Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(LSTM(output_dim=(200),return_sequences=True, input_shape = (1, 1800)))
-        model.add(LSTM(output_dim=(200)))
+        model.add(LSTM(output_dim=(50), use_bias=True, bias_initializer='normal', return_sequences=True, input_shape = (1, 1800)))
+        #model.add(LSTM(output_dim=(200),return_sequences=True))
+        #model.add(LSTM(output_dim=(200)))
+        keras.initializers.RandomNormal(mean=5, stddev=1, seed=None)
+        model.add(Conv1D(4, 1, input_shape=(1, 1800)))
+        model.add(Flatten())
+        model.add(Dense(10, input_dim=50,init='uniform', use_bias=True, bias_initializer="ones", activation='tanh'))
+        model.add(Dropout(0.2))
+        model.add(Dense(10, activation='relu', init='uniform')) #was tanh
 
-        #model.add(Conv1D(4, 1, input_shape=(1, 1800)))
-        #model.add(Flatten())
-        model.add(Dense(2000, input_dim=200, activation='tanh'))
-        model.add(Dropout(0.25))
-        model.add(Dense(200, activation='tanh', init='uniform'))
-
-        model.add(Dense(self.action_size, activation='linear'))
+        model.add(Dense(self.action_size,use_bias=True, bias_initializer="ones", activation='relu'))
         model.compile(loss='mse',
                       optimizer=RMSprop(lr=self.learning_rate))
         return model
@@ -60,14 +63,15 @@ class DQNAgent:
         act_values = self.model.predict(state)
         return act_values[0]  # returns action
 
+
     def replay(self, batch_size):
         batch_size = min(batch_size, len(self.memory))
         minibatch = self.memory
         minibatch = list(minibatch)[-2000:-1]
         random.shuffle(minibatch, random.random)
         #minibatch = list(random.shuffle(self.memory))
-        X = np.zeros((2000, 1800))
-        Y = np.zeros((2000, self.action_size))
+        # X = np.zeros((2000, 1800))
+        # Y = np.zeros((2000, self.action_size))
         for i in range(len(minibatch)):
             state, action, reward, next_state, done = minibatch[i]
             target = self.model.predict(state.reshape(1,1,1800))[0]
@@ -75,39 +79,18 @@ class DQNAgent:
             if done:
                  target[action] = reward
             else:
-                 target[action] = reward + self.gamma * \
+                 target[action] = reward + 5*self.gamma * \
                                            np.amax(self.model.predict(next_state.reshape(1,1,1800))[0])
             state = state.reshape(1,1,1800)
-            X[i], Y[i] = state, target
-        X = X.reshape(2000,1,1800)
+            self.X[i], self.Y[i] = state, target
+        print(self.X,self.Y)
+        self.X = self.X.reshape(2000, 1,1800)
 
-        self.fitted = self.model.fit(X, Y, batch_size=batch_size, verbose=0, nb_epoch=5)
+        self.fitted = self.model.fit(self.X, self.Y, batch_size=batch_size, verbose=0, nb_epoch=3)
 
         self.losses.append(self.fitted.history['loss'])
-        print("Fitted ")
         if self.epsilon > self.e_min:
             self.epsilon *= self.e_decay
-
-
-    # def replay(self, batch_size):
-    #     batch_size = min(batch_size, len(self.memory))
-    #     minibatch = random.sample(self.memory, batch_size)
-    #     X = np.zeros((batch_size, 1800))
-    #     Y = np.zeros((batch_size, self.action_size))
-    #     for i in range(batch_size):
-    #         state, action, reward, next_state, done = minibatch[i]
-    #         target = self.model.predict(state.reshape(1,1,1800))[0]
-    #         if done:
-    #             target[action] = reward
-    #         else:
-    #             target[action] = reward + self.gamma * \
-    #                                       np.amax(self.model.predict(next_state.reshape(1,1,1800))[0])
-    #         state = state.reshape(1,1,1800)
-    #         X[i], Y[i] = state, target
-    #     X = X.reshape(150,1,1800)
-    #     self.fitted =self.model.fit(X, Y, batch_size=batch_size, verbose=1, nb_epoch=5)
-    #     if self.epsilon > self.e_min:
-    #         self.epsilon *= self.e_decay
 
 
     def plot_loss(self):

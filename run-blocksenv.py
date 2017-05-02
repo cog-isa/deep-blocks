@@ -4,11 +4,10 @@ import sys
 #configs/blocks30x30.yaml data/map.csv data/target.csv data/target01.csv data/target02.csv data/target04.csv
 #  data/target05.csv
 
-import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib import pyplot as plt
-import gym
+# import matplotlib
+# matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
+import gym
 import numpy as np
 import pandas as pd
 import scipy.misc
@@ -16,7 +15,8 @@ import yaml
 #from slideshow import slideshows
 from gym_blocks.dqn_agents import DQNAgent
 from rendering import draw
-
+from time import gmtime, strftime
+current_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
 def get_distance(map, target, hand_position):
     map = map[:, 0:900]
@@ -32,6 +32,7 @@ def get_distance(map, target, hand_position):
         for j in range(10):
             if dif[3*i+1,3*j+1]==-1:
                 target_position = (i,j)
+
     cube_position = list(cube_position)
     target_position = list(target_position)
     cube_position[0]=cube_position[0]*3+1
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     logger = logging.getLogger('spam_application')
     logger.setLevel(logging.DEBUG)
     # create file handler which logs even debug messages
-    fh = logging.FileHandler('spam.log')
+    fh = logging.FileHandler(current_time+'spam.log')
     fh.setLevel(logging.DEBUG)
     # create console handler with a higher log level
     ch = logging.StreamHandler()
@@ -141,14 +142,17 @@ if __name__ == "__main__":
 
             if len(current_rewards) > 0:
                 if action < 4 and reward < np.mean(current_rewards):
-                    reward = -1
+                    reward = 0.05
             if len(current_rewards)>5:
                 if action > 4 and reward < current_rewards[-1]:
-                    reward = -1
+                    reward = 0.05
             if action == np.mean(actions[-4:-1]):
-                reward = -1
+                reward = 0.05
             if np.sum(next_observation-observation) == 0:
-                reward = -1
+                reward = 0.05
+            if action == 1: reward = 0.8
+            if action == 0 or action == 2: reward = 0.4
+            current_rewards.append(reward)
 
             if done1 == False:
                 if get_distance(next_observation, raw_map_mid01, hand_position)==True:
@@ -156,7 +160,7 @@ if __name__ == "__main__":
                     reward = 1
                     subtarget1 +=1
                 else:
-                    reward = 1 - get_distance(next_observation, raw_map_mid01, hand_position)
+                    coef = 1 - get_distance(next_observation, raw_map_mid01, hand_position)
                     print(reward)
 
             if done2 == False:
@@ -165,7 +169,7 @@ if __name__ == "__main__":
                     reward = 1
                     subtarget2 +=1
 
-                else: reward = 1 - get_distance(next_observation, raw_map_mid02, hand_position)
+                else: coef = 1 - get_distance(next_observation, raw_map_mid02, hand_position)
 
             if done3 == False:
                 if get_distance(next_observation, raw_map_mid03, hand_position)==True:
@@ -173,7 +177,7 @@ if __name__ == "__main__":
                     reward = 1
                     subtarget3 +=1
 
-                else: reward = 1 - get_distance(next_observation, raw_map_mid03, hand_position)
+                else: coef = 1 - get_distance(next_observation, raw_map_mid03, hand_position)
 
             if done4 == False:
                 if get_distance(next_observation, raw_map_mid04, hand_position)==True:
@@ -181,13 +185,13 @@ if __name__ == "__main__":
                     reward = 1
                     subtarget4 +=1
 
-                else: reward = 1 - get_distance(next_observation, raw_map_mid04, hand_position)
+                else: coef = 1 - get_distance(next_observation, raw_map_mid04, hand_position)
 
-            agent.remember(observation, action, reward - current_rewards[-1], next_observation, done)
+            agent.remember(observation, action, reward*coef, next_observation, done)
 
             logger.info("Reward: {}".format(reward))
 
-            current_rewards.append(reward)
+
             observation = next_observation
 
             if done:
@@ -199,6 +203,7 @@ if __name__ == "__main__":
         agent.replay(150)
         print("End Replay: {}".format(e))
         print("Won:", games_won, "games", subtarget1, subtarget2, subtarget3, subtarget4)
+
 
     #env.render()
     #plt.show()
