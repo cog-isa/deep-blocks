@@ -38,7 +38,7 @@ class Slideshow(object):
         self.imglbl.pack(fill=tk.BOTH, expand=True)
 
         # start slideshow on the next tick
-        self.imglbl.after(1, self._slideshow, slideshow_delay * 100)
+        self.imglbl.after(1, self._slideshow, slideshow_delay * 10)
 
     def _slideshow(self, delay_milliseconds):
         self._files.append(next(self.filenames))

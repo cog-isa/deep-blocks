@@ -70,10 +70,10 @@ if __name__ == "__main__":
 
 
     # create logger with 'spam_application'
-    logger = logging.getLogger('spam_application')
+    logger = logging.getLogger('deep_blocks')
     logger.setLevel(logging.DEBUG)
     # create file handler which logs even debug messages
-    fh = logging.FileHandler(current_time+'spam.log')
+    fh = logging.FileHandler(current_time+'.log')
     fh.setLevel(logging.DEBUG)
     # create console handler with a higher log level
     ch = logging.StreamHandler()
@@ -116,6 +116,7 @@ if __name__ == "__main__":
     for e in range(run_params['episodes']):
         observation = env.reset()
         current_rewards = [0]
+        coefs =[0]
         #k = 11
         done1 = False
         done2 = False
@@ -135,33 +136,34 @@ if __name__ == "__main__":
             logger.info("Q-values: {}".format(qvalues))
 
             next_observation, reward, done, hand_position = env.step(action)
+            logger.info("Initial reward from env: {}".format(reward))
+
             draw(next_observation,time,e)
-
-
             if reward == 1: games_won += 1
 
-            if len(current_rewards) > 0:
-                if action < 4 and reward < np.mean(current_rewards):
-                    reward = 0.05
-            if len(current_rewards)>5:
-                if action > 4 and reward < current_rewards[-1]:
-                    reward = 0.05
-            if action == np.mean(actions[-4:-1]):
-                reward = 0.05
-            if np.sum(next_observation-observation) == 0:
-                reward = 0.05
-            if action == 1: reward = 0.8
-            if action == 0 or action == 2: reward = 0.4
-            current_rewards.append(reward)
-
+            # if len(current_rewards) > 0:
+            #     if action < 4 and reward < np.mean(current_rewards):
+            #         reward = 0.05
+            # if len(current_rewards)>5:
+            #     if action > 4 and reward < current_rewards[-1]:
+            #         reward = 0.05
+            # if action == np.mean(actions[-4:-1]):
+            #     reward = 0.05
+            if np.sum(np.abs(next_observation-observation)) == 0:
+                reward = 0.1
+                print("NO CHANGES")
+            else: print("OK")
+            #if action == 1: reward = 0.8
+            #if action == 0 or action == 2: reward = 0.4
             if done1 == False:
                 if get_distance(next_observation, raw_map_mid01, hand_position)==True:
                     done1 = True
                     reward = 1
                     subtarget1 +=1
+                    print("Done 1")
                 else:
                     coef = 1 - get_distance(next_observation, raw_map_mid01, hand_position)
-                    print(reward)
+                    print(reward, coef)
 
             if done2 == False:
                 if get_distance(next_observation, raw_map_mid02, hand_position)==True:
@@ -186,10 +188,12 @@ if __name__ == "__main__":
                     subtarget4 +=1
 
                 else: coef = 1 - get_distance(next_observation, raw_map_mid04, hand_position)
+            logger.info("Reward {} and coef: {}".format(reward, coef))
 
-            agent.remember(observation, action, reward*coef, next_observation, done)
+            agent.remember(observation, action, reward*coef-coefs[-1]*current_rewards[-1], next_observation, done)
+            coefs.append(coef)
+            current_rewards.append(reward)
 
-            logger.info("Reward: {}".format(reward))
 
 
             observation = next_observation

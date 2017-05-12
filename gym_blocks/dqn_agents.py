@@ -35,18 +35,18 @@ class DQNAgent:
     def _build_model(self):
         #Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(LSTM(output_dim=(50), use_bias=True, bias_initializer='normal', return_sequences=True, input_shape = (1, 1800)))
+        model.add(LSTM(output_dim=(200),  return_sequences=True, input_shape = (1, 1800)))
         #model.add(LSTM(output_dim=(200),return_sequences=True))
         #model.add(LSTM(output_dim=(200)))
-        keras.initializers.RandomNormal(mean=5, stddev=1, seed=None)
-        model.add(Conv1D(4, 1, input_shape=(1, 1800)))
+        #keras.initializers.RandomNormal(mean=5, stddev=1, seed=None)
+        model.add(Conv1D(10, 1, input_shape=(1, 1800)))
         model.add(Flatten())
-        model.add(Dense(10, input_dim=50,init='uniform', use_bias=True, bias_initializer="ones", activation='tanh'))
+        model.add(Dense(10, input_dim=200, init='uniform', activation='tanh'))
         model.add(Dropout(0.2))
-        model.add(Dense(10, activation='relu', init='uniform')) #was tanh
+        model.add(Dense(100, activation='sigmoid', init='uniform')) #was tanh
 
-        model.add(Dense(self.action_size,use_bias=True, bias_initializer="ones", activation='relu'))
-        model.compile(loss='mse',
+        model.add(Dense(self.action_size, activation='sigmoid'))
+        model.compile(loss='mae',
                       optimizer=RMSprop(lr=self.learning_rate))
         return model
 
@@ -83,7 +83,6 @@ class DQNAgent:
                                            np.amax(self.model.predict(next_state.reshape(1,1,1800))[0])
             state = state.reshape(1,1,1800)
             self.X[i], self.Y[i] = state, target
-        print(self.X,self.Y)
         self.X = self.X.reshape(2000, 1,1800)
 
         self.fitted = self.model.fit(self.X, self.Y, batch_size=batch_size, verbose=0, nb_epoch=3)
