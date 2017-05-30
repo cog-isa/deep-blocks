@@ -45,8 +45,8 @@ class DQNAgent:
         model.add(Dropout(0.2))
         model.add(Dense(100, activation='sigmoid', init='uniform')) #was tanh
 
-        model.add(Dense(self.action_size, activation='sigmoid'))
-        model.compile(loss='mae',
+        model.add(Dense(self.action_size, activation='linear'))
+        model.compile(loss='mse',
                       optimizer=RMSprop(lr=self.learning_rate))
         return model
 

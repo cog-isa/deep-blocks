@@ -240,16 +240,7 @@ class BlocksEnv(gym.Env):
         map_rewarded[self.hand_position[0] + 1][self.hand_position[1] + 1] = 0
 
         rew = np.sum(np.array(self.sit_final_map) * np.array(map_rewarded)) / np.sum(self.sit_final_map)
-        if self.last_action:
-            if (a == 3) and (int(self.last_action) % 8 > 3): rew = 1.05 * rew  # increase rew for rational movements
-            # assign zero reward for absolutely silly steps
-            if (a == 1) and (int(self.last_action) % 8 > 3): rew = -1
-            if (a == 3) and (int(self.last_action) % 8 == 7): rew = -1
-            if (a == 4) and (int(self.last_action) % 8 == 1): rew = -1
-            if (a == 1) and (int(self.last_action) % 8 == 3): rew = -1
-            if (a == 3) and (int(self.last_action) % 8 == 1): rew = -1
-            if (a == 0) and (int(self.last_action) % 8 == 2): rew = -1
-            if (a == 2) and (int(self.last_action) % 8 == 0): rew = -1
+
 
         self.reward = rew
         self.last_action = a
@@ -267,7 +258,7 @@ class BlocksEnv(gym.Env):
         if  self.step_n == 100:
             self.reset()
             self.step_n = 1
-            return self.state, 0, 1,self.hand_position  # third param means "game over"
+            return self.state, 0, 1, self.hand_position  #third param means "game over"
 
 
         self.step_n +=1
